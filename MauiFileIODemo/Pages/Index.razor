@@ -23,15 +23,24 @@ Example 3 - Save data to file
 <br />
 Example 4 - Create a Collection of class student and save the list to a file<br />
 saving variables and classes to disk is called serialization.<br />
-<button @onclick="example4"> Example 3</button>
+<button @onclick="example4"> Example 4</button>
+<br />
+<br />
+Example 5 - Clear the list of students and reload them from the text file
+<button @onclick="example5"> Example 5</button>
+<br /> 
+@(new MarkupString(@contentsOfStudents))
 
 
 @code 
 {
     string content1 = "This is the content";
     string path = @"C:\Users\ghoran\Documents\test.txt";
+    string contentsOfStudents = "";
 
     string example3Input;
+
+    List<Student> students = new List<Student>();
 
     public void example1()
     {
@@ -62,22 +71,37 @@ saving variables and classes to disk is called serialization.<br />
     public void example4()
     {
         Console.WriteLine("starting");
-        List<Student> students = new List<Student>();
+
         students.Add(new Student("Jane", 100));
         students.Add(new Student("Jill", 101));
         students.Add(new Student("Jenny", 102));
 
 
         XmlSerializer x = new XmlSerializer(students.GetType());
-        var sww = new StringWriter();
-        XmlWriter writer = XmlWriter.Create(sww);
 
+        TextWriter writer = new StreamWriter(path);
         x.Serialize(writer, students);
-        string y = sww.ToString();
-        Console.WriteLine(sww);
-        File.WriteAllText(path, sww.ToString());
+        writer.Close();
 
+    }
 
+    public void example5()
+    {
+        // all existing students removed.
+        students.Clear();
+
+        // grab info from file
+        XmlSerializer x = new XmlSerializer(students.GetType());
+        TextReader reader = new StreamReader(path);
+        students =  (List<Student>) x.Deserialize(reader);
+        reader.Close();
+
+        // print student info to screen.
+        contentsOfStudents = "";
+        foreach (Student student in students)
+        {
+            contentsOfStudents = contentsOfStudents + student.Name + " " + student.Id + "<br>";
+        }
     }
 }
 
