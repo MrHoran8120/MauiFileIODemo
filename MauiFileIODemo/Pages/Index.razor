@@ -1,0 +1,84 @@
+﻿@page "/"
+@using System.Xml.Serialization
+@using System.Xml
+
+<h1>File IO testing</h1>
+This document shows some IO features of Maui Blazor. A good reference<a href="https://docs.microsoft.com/en-us/dotnet/maui/platform-integration/storage/file-system-helpers?tabs=windows">can be found here</a> <br /><br />
+
+
+<h2>The Content</h2><br />
+@content1
+
+<br /><br />
+
+<br />
+Example 1 - load data from a file <button @onclick="example1">Example 1</button>
+<br /><br />
+Example 2 - load data from a file chosen with a picker <button @onclick="example2"> Example 2</button>
+<br /><br />
+Example 3 - Save data to file
+<input type="text" @bind=example3Input>
+<button @onclick="example3"> Example 3</button>
+<br />
+<br />
+Example 4 - Create a Collection of class student and save the list to a file<br />
+saving variables and classes to disk is called serialization.<br />
+<button @onclick="example4"> Example 3</button>
+
+
+@code 
+{
+    string content1 = "This is the content";
+    string path = @"C:\Users\ghoran\Documents\test.txt";
+
+    string example3Input;
+
+    public void example1()
+    {
+        content1 = File.ReadAllText(path);
+    }
+
+    public async void example2()
+    {
+
+        var fileName =  await FilePicker.Default.PickAsync();
+        content1 = "";
+        content1 = File.ReadAllText(fileName.FullPath);
+
+        // force screen refresh.
+        this.StateHasChanged();
+    }
+
+    public void example3()
+    {
+        // note that the path is hardcoded, I could not find a Maui version of 
+        // filesavepicker
+
+        Console.WriteLine("The input was " + example3Input);
+        string path = @"C:\Users\ghoran\Documents\testOut.txt";
+        File.WriteAllText(path, example3Input);
+    }
+
+    public void example4()
+    {
+        Console.WriteLine("starting");
+        List<Student> students = new List<Student>();
+        students.Add(new Student("Jane", 100));
+        students.Add(new Student("Jill", 101));
+        students.Add(new Student("Jenny", 102));
+
+
+        XmlSerializer x = new XmlSerializer(students.GetType());
+        var sww = new StringWriter();
+        XmlWriter writer = XmlWriter.Create(sww);
+
+        x.Serialize(writer, students);
+        string y = sww.ToString();
+        Console.WriteLine(sww);
+        File.WriteAllText(path, sww.ToString());
+
+
+    }
+}
+
+
